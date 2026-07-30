@@ -1,0 +1,804 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Careers Portal</title>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #635bff;
+            --primary-hover: #4b44d4;
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --badge-bg: #f1f5f9;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-dark);
+            padding: 20px 40px;
+        }
+
+        /* Top Header */
+        .portal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1100px;
+            margin: 0 auto 20px auto;
+        }
+
+        .header-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .header-icon {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 20px;
+        }
+
+        .header-title h1 {
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .header-title p {
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .btn-saved-searches {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+
+        .btn-saved-searches:hover {
+            background-color: #f8fafc;
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        /* Search & Filter Card */
+        .search-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .search-input-wrapper i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 12px 12px 42px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 15px;
+            outline: none;
+            background-color: #f8fafc;
+        }
+
+        .search-input:focus {
+            border-color: var(--primary-color);
+            background-color: #fff;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .filter-select {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            font-size: 14px;
+            color: var(--text-dark);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .btn-clear {
+            background: #ffebe9;
+            color: #d9381e;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-save-search {
+            margin-left: auto;
+            background: #eef2ff;
+            color: var(--primary-color);
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-save-search:hover {
+            background: #e0e7ff;
+        }
+
+        /* Results Counter */
+        .results-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Job Cards Grid */
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .job-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        }
+
+        .job-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+
+        .job-briefcase-icon {
+            background: #fdf2f8;
+            color: #9d174d;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 18px;
+        }
+
+        .badge-type {
+            background: #dcfce7;
+            color: #15803d;
+            font-size: 12px;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .job-card-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .badge-dept {
+            display: inline-block;
+            background: #fce7f3;
+            color: #be185d;
+            font-size: 12px;
+            padding: 3px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+
+        .job-details-list {
+            list-style: none;
+            font-size: 13px;
+            color: var(--text-muted);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .job-details-list li {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Modal Backdrop */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-card {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .modal-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 24px;
+            border-top-left-radius: 16px;
+            border-top-right-radius: 16px;
+            position: relative;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .modal-header h2 {
+            font-size: 22px;
+            margin-bottom: 4px;
+        }
+
+        .modal-header p {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 12px;
+        }
+
+        .modal-header-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 13px;
+            flex-wrap: wrap;
+        }
+
+        .modal-body {
+            padding: 24px;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #334155;
+        }
+
+        .modal-body h4 {
+            margin: 15px 0 8px 0;
+            color: var(--text-dark);
+        }
+
+        .modal-body ul {
+            padding-left: 20px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .btn-apply-now {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 15px;
+            text-decoration: none;
+        }
+
+        .btn-apply-now:hover {
+            background: var(--primary-hover);
+        }
+
+        /* Saved Search Item Style */
+        .saved-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .btn-delete-saved {
+            color: #ef4444;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="portal-header">
+        <div class="header-title">
+            <div class="header-icon"><i class="fa-solid fa-briefcase"></i></div>
+            <div>
+                <h1>Careers Portal</h1>
+                <p>Explore open opportunities</p>
+            </div>
+        </div>
+        <button class="btn-saved-searches" onclick="openSavedSearchesModal()">
+            <i class="fa-regular fa-bookmark"></i> Saved Searches ( <span id="savedCount">0</span> )
+        </button>
+    </header>
+
+    <div class="container">
+        <!-- Search & Filter Area -->
+        <div class="search-card">
+            <div class="search-input-wrapper">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search by job title, department, skills..." oninput="applyFilters()">
+            </div>
+            <div class="filter-row">
+                <span class="filter-label">Filter:</span>
+                
+                <select id="filterDept" class="filter-select" onchange="applyFilters()">
+                    <option value="All">All Departments</option>
+                    <option value="Marketing">Marketing</option>
+                    <option value="Engineering">Engineering</option>
+                    <option value="Design">Design</option>
+                </select>
+
+                <select id="filterLoc" class="filter-select" onchange="applyFilters()">
+                    <option value="All">All Locations</option>
+                    <option value="New York, NY">New York, NY</option>
+                    <option value="Remote">Remote</option>
+                    <option value="Chennai, TN">Chennai, TN</option>
+                </select>
+
+                <select id="filterType" class="filter-select" onchange="applyFilters()">
+                    <option value="All">All Types</option>
+                    <option value="Full-time">Full-time</option>
+                    <option value="Part-time">Part-time</option>
+                </select>
+
+                <button class="btn-clear" onclick="clearFilters()">Clear</button>
+                <button class="btn-save-search" onclick="saveCurrentSearch()"><i class="fa-solid fa-bookmark"></i> Save Search</button>
+            </div>
+        </div>
+
+        <!-- Count Bar -->
+        <div class="results-meta">
+            <span id="jobCountText">0 vacancies found</span>
+            <span>Updated daily</span>
+        </div>
+
+        <!-- Jobs Grid Container -->
+        <div class="jobs-grid" id="jobsGrid"></div>
+    </div>
+
+    <!-- Job Detail Popup Modal -->
+    <div class="modal-overlay" id="jobModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <button class="modal-close" onclick="closeJobModal()">&times;</button>
+                <h2 id="modalTitle">Job Title</h2>
+                <p id="modalDept">Department</p>
+                <div class="modal-header-meta">
+                    <span id="modalLoc"><i class="fa-solid fa-location-dot"></i> Location</span>
+                    <span id="modalType"><i class="fa-solid fa-clock"></i> Type</span>
+                    <span id="modalSalary"><i class="fa-solid fa-sack-dollar"></i> Salary</span>
+                    <span id="modalOpenings"><i class="fa-solid fa-users"></i> Openings</span>
+                </div>
+            </div>
+            <div class="modal-body">
+                <h4>About the Role</h4>
+                <p id="modalAbout">Job description content...</p>
+                
+                <h4>Responsibilities</h4>
+                <ul id="modalResponsibilities"></ul>
+
+                <h4>Requirements</h4>
+                <ul id="modalRequirements"></ul>
+            </div>
+            <div class="modal-footer">
+                <a id="modalApplyBtn" href="#" target="_blank" class="btn-apply-now">Apply Now</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Saved Searches Modal -->
+    <div class="modal-overlay" id="savedSearchesModal">
+        <div class="modal-card" style="padding: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <h3>Your Saved Searches</h3>
+                <button class="modal-close" style="color: black;" onclick="closeSavedModal()">&times;</button>
+            </div>
+            <div id="savedSearchesList">
+                <p style="color: var(--text-muted); font-size: 14px;">No saved searches yet.</p>
+            </div>
+        </div>
+    </div>
+
+  <script>
+    // ==========================================
+    // 1. FRONTEND CONFIGURATION
+    // ==========================================
+    const BACKEND_API_URL = "http://localhost:5000/api/jobs";
+    const PUBLIC_APPLY_FORM_URL = "https://development-presolutions.kissflow.com/public/Process/Pfca53fb23-bb24-4fc7-bcca-bd7b2db5ed32";
+    
+    let jobsData = [];
+    let savedSearches = JSON.parse(localStorage.getItem("savedSearches") || "[]");
+
+    // Helper function to extract keys dynamically (handles trailing spaces in Kissflow field names)
+    function getProp(obj, ...keys) {
+        for (let key of keys) {
+            if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== "") {
+                return String(obj[key]).trim();
+            }
+        }
+        return "";
+    }
+
+    // ==========================================
+    // 2. FETCH DATA FROM KISSFLOW BACKEND
+    // ==========================================
+    async function fetchJobsFromKissflow() {
+        try {
+            const response = await fetch(BACKEND_API_URL);
+            const result = await response.json();
+
+            console.log("Data received from backend:", result);
+
+            if (result && result.success && result.data) {
+                jobsData = Array.isArray(result.data) ? result.data : [];
+            } else if (Array.isArray(result)) {
+                jobsData = result;
+            } else {
+                console.error("Backend error or unexpected format:", result);
+                jobsData = [];
+            }
+
+            // Populate Location & Department dropdowns ONLY from Kissflow data
+            populateDynamicFilters(jobsData);
+            
+            // Render job cards
+            renderJobs(jobsData);
+        } catch (error) {
+            console.error("Could not reach backend server:", error);
+            renderJobs([]);
+        }
+    }
+
+    // Dynamic Filter Generator (Only displays options present in Kissflow entries)
+    function populateDynamicFilters(jobs) {
+        const deptSelect = document.getElementById("filterDept");
+        const locSelect = document.getElementById("filterLoc");
+
+        if (!deptSelect || !locSelect) return;
+
+        const departments = new Set();
+        const locations = new Set();
+
+        jobs.forEach(job => {
+            const dept = getProp(job, "Department", "Department ", "dept", "department");
+            const loc = getProp(job, "Location", "Location ", "location");
+
+            if (dept) departments.add(dept);
+            if (loc) locations.add(loc);
+        });
+
+        // Rebuild Department Dropdown dynamically
+        deptSelect.innerHTML = `<option value="All">All Departments</option>`;
+        departments.forEach(dept => {
+            deptSelect.innerHTML += `<option value="${dept}">${dept}</option>`;
+        });
+
+        // Rebuild Location Dropdown dynamically
+        locSelect.innerHTML = `<option value="All">All Locations</option>`;
+        locations.forEach(loc => {
+            locSelect.innerHTML += `<option value="${loc}">${loc}</option>`;
+        });
+    }
+
+    // ==========================================
+    // 3. RENDER JOBS & CARDS
+    // ==========================================
+    function renderJobs(list) {
+        const grid = document.getElementById("jobsGrid");
+        if (!grid) return;
+        
+        grid.innerHTML = "";
+
+        const countElem = document.getElementById("jobCountText");
+        if (countElem) {
+            countElem.innerText = `${list.length} vacancies found`;
+        }
+
+        if (list.length === 0) {
+            grid.innerHTML = "<p style='color:var(--text-muted); grid-column: 1/-1;'>No vacancies matching your criteria.</p>";
+            return;
+        }
+
+        list.forEach((job, index) => {
+            const card = document.createElement("div");
+            card.className = "job-card";
+            
+            const jobId = getProp(job, "id", "Vacancy_Slug_ID", "Vacancy Slug/ID") || index;
+            card.onclick = () => openJobModal(jobId);
+            
+            const jobTitle = getProp(job, "Job title", "Job title ", "title") || "Untitled Position";
+            const jobDept = getProp(job, "Department", "Department ", "dept") || "General";
+            const empType = getProp(job, "Employment Type", "Employment Type ", "type") || "Full-time";
+            const remoteStatus = getProp(job, "Remote Status", "Remote Status ", "workType", "Work Type");
+            
+            // Badge displays "Full-time • On-site" or "Full-time • Remote" up top
+            const badgeText = remoteStatus ? `${empType} • ${remoteStatus}` : empType;
+
+            // Location line displays real city/state (e.g., Chennai, Tamil Nadu, India)
+            const jobLoc = getProp(job, "Location", "Location ", "location") || "Location Not Specified";
+            const jobSalary = getProp(job, "Salary Range", "Salary Range ", "salary") || "N/A";
+            const jobOpenings = getProp(job, "Openings", "Openings ", "openings") || 1;
+
+            card.innerHTML = `
+                <div class="job-card-header">
+                    <div class="job-briefcase-icon"><i class="fa-solid fa-briefcase"></i></div>
+                    <span class="badge-type">${badgeText}</span>
+                </div>
+                <div class="job-card-title">${jobTitle}</div>
+                <span class="badge-dept">${jobDept}</span>
+                <ul class="job-details-list">
+                    <li><i class="fa-solid fa-location-dot"></i> ${jobLoc}</li>
+                    <li><i class="fa-solid fa-sack-dollar"></i> ${jobSalary}</li>
+                    <li><i class="fa-solid fa-user"></i> ${jobOpenings}</li>
+                </ul>
+            `;
+            grid.appendChild(card);
+        });
+    }
+
+    // ==========================================
+    // 4. FILTER LOGIC
+    // ==========================================
+    function applyFilters() {
+        const search = (document.getElementById("searchInput")?.value || "").toLowerCase();
+        const dept = document.getElementById("filterDept")?.value || "All";
+        const loc = document.getElementById("filterLoc")?.value || "All";
+        const type = document.getElementById("filterType")?.value || "All";
+
+        const filtered = jobsData.filter(job => {
+            const title = getProp(job, "Job title", "Job title ", "title").toLowerCase();
+            const jobDept = getProp(job, "Department", "Department ", "dept");
+            const jobLoc = getProp(job, "Location", "Location ", "location");
+            const empType = getProp(job, "Employment Type", "Employment Type ", "type");
+
+            const matchesSearch = title.includes(search) || jobDept.toLowerCase().includes(search);
+            const matchesDept = (dept === "All") || jobDept === dept;
+            const matchesLoc = (loc === "All") || jobLoc === loc;
+            const matchesType = (type === "All") || empType === type;
+
+            return matchesSearch && matchesDept && matchesLoc && matchesType;
+        });
+
+        renderJobs(filtered);
+    }
+
+    function clearFilters() {
+        if (document.getElementById("searchInput")) document.getElementById("searchInput").value = "";
+        if (document.getElementById("filterDept")) document.getElementById("filterDept").value = "All";
+        if (document.getElementById("filterLoc")) document.getElementById("filterLoc").value = "All";
+        if (document.getElementById("filterType")) document.getElementById("filterType").value = "All";
+        applyFilters();
+    }
+
+    // ==========================================
+    // 5. MODAL POPUP LOGIC
+    // ==========================================
+    function openJobModal(jobId) {
+        const job = jobsData.find((j, idx) => (getProp(j, "id", "Vacancy_Slug_ID", "Vacancy Slug/ID") || idx) == jobId) || jobsData[0];
+        if (!job) return;
+
+        const jobTitle = getProp(job, "Job title", "Job title ", "title") || "Untitled Position";
+        const jobDept = getProp(job, "Department", "Department ", "dept") || "General";
+        const empType = getProp(job, "Employment Type", "Employment Type ", "type") || "Full-time";
+        const remoteStatus = getProp(job, "Remote Status", "Remote Status ", "workType", "Work Type");
+        
+        const jobLoc = getProp(job, "Location", "Location ", "location") || "Location Not Specified";
+        const jobSalary = getProp(job, "Salary Range", "Salary Range ", "salary") || "N/A";
+        const jobOpenings = getProp(job, "Openings", "Openings ", "openings") || 1;
+        const jobAbout = getProp(job, "About the Role", "About the Role ", "about") || "No description provided.";
+
+        document.getElementById("modalTitle").innerText = jobTitle;
+        document.getElementById("modalDept").innerText = jobDept;
+        
+        // Modal Location
+        document.getElementById("modalLoc").innerHTML = `<i class="fa-solid fa-location-dot"></i> ${jobLoc}`;
+        
+        // Modal Work Mode
+        const typeText = remoteStatus ? `${empType} • ${remoteStatus}` : empType;
+        document.getElementById("modalType").innerHTML = `<i class="fa-solid fa-clock"></i> ${typeText}`;
+        
+        document.getElementById("modalSalary").innerHTML = `<i class="fa-solid fa-sack-dollar"></i> ${jobSalary}`;
+        document.getElementById("modalOpenings").innerHTML = `<i class="fa-solid fa-users"></i> ${jobOpenings}`;
+        document.getElementById("modalAbout").innerText = jobAbout;
+
+        const respUl = document.getElementById("modalResponsibilities");
+        const respData = getProp(job, "Responsibilities", "Responsibilities ", "responsibilities");
+        if (Array.isArray(respData)) {
+            respUl.innerHTML = respData.map(r => `<li>${r}</li>`).join("");
+        } else if (typeof respData === "string" && respData.trim()) {
+            respUl.innerHTML = `<li>${respData}</li>`;
+        } else {
+            respUl.innerHTML = "<li>None specified</li>";
+        }
+
+        const reqUl = document.getElementById("modalRequirements");
+        const reqData = getProp(job, "Requirements", "Requirements ", "requirements");
+        if (Array.isArray(reqData)) {
+            reqUl.innerHTML = reqData.map(r => `<li>${r}</li>`).join("");
+        } else if (typeof reqData === "string" && reqData.trim()) {
+            reqUl.innerHTML = `<li>${reqData}</li>`;
+        } else {
+            reqUl.innerHTML = "<li>None specified</li>";
+        }
+
+        document.getElementById("modalApplyBtn").href = getProp(job, "applyUrl") || PUBLIC_APPLY_FORM_URL;
+        document.getElementById("jobModal").style.display = "flex";
+    }
+
+    function closeJobModal() {
+        document.getElementById("jobModal").style.display = "none";
+    }
+
+    // ==========================================
+    // 6. SAVED SEARCHES FEATURE
+    // ==========================================
+    function updateSavedCount() {
+        const elem = document.getElementById("savedCount");
+        if (elem) elem.innerText = savedSearches.length;
+    }
+
+    function saveCurrentSearch() {
+        const search = document.getElementById("searchInput")?.value || "";
+        const dept = document.getElementById("filterDept")?.value || "All";
+        const loc = document.getElementById("filterLoc")?.value || "All";
+        const type = document.getElementById("filterType")?.value || "All";
+
+        const name = search || `${dept} in ${loc}`;
+        savedSearches.push({ name, search, dept, loc, type });
+        localStorage.setItem("savedSearches", JSON.stringify(savedSearches));
+        updateSavedCount();
+        alert("Search saved successfully!");
+    }
+
+    function openSavedSearchesModal() {
+        const container = document.getElementById("savedSearchesList");
+        if (!container) return;
+        container.innerHTML = "";
+
+        if (savedSearches.length === 0) {
+            container.innerHTML = "<p style='color: var(--text-muted); font-size: 14px;'>No saved searches yet.</p>";
+        } else {
+            savedSearches.forEach((item, index) => {
+                const div = document.createElement("div");
+                div.className = "saved-item";
+                div.innerHTML = `
+                    <div>
+                        <strong>${item.name}</strong> <br>
+                        <small style="color:var(--text-muted)">Dept: ${item.dept} | Loc: ${item.loc}</small>
+                    </div>
+                    <div>
+                        <button class="btn-clear" onclick="applySavedQuery(${index})">Apply</button>
+                        <button class="btn-delete-saved" onclick="deleteSavedQuery(${index})"><i class="fa-solid fa-trash"></i></button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+        document.getElementById("savedSearchesModal").style.display = "flex";
+    }
+
+    function closeSavedModal() {
+        document.getElementById("savedSearchesModal").style.display = "none";
+    }
+
+    function applySavedQuery(index) {
+        const query = savedSearches[index];
+        if (document.getElementById("searchInput")) document.getElementById("searchInput").value = query.search;
+        if (document.getElementById("filterDept")) document.getElementById("filterDept").value = query.dept;
+        if (document.getElementById("filterLoc")) document.getElementById("filterLoc").value = query.loc;
+        if (document.getElementById("filterType")) document.getElementById("filterType").value = query.type;
+        closeSavedModal();
+        applyFilters();
+    }
+
+    function deleteSavedQuery(index) {
+        savedSearches.splice(index, 1);
+        localStorage.setItem("savedSearches", JSON.stringify(savedSearches));
+        updateSavedCount();
+        openSavedSearchesModal();
+    }
+
+    // ==========================================
+    // 7. INITIALIZATION ON PAGE LOAD
+    // ==========================================
+    window.onload = function() {
+        fetchJobsFromKissflow();
+        updateSavedCount();
+    };
+</script>
+</body>
+</html>
