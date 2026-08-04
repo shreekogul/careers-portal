@@ -25,7 +25,7 @@ app.post('/api/webhooks/kissflow', (req, res) => {
   // Save array into kissflow-backend/jobs.json
   fs.writeFileSync(jobsFilePath, JSON.stringify(jobListings, null, 2));
 
-  console.log("Saved to kissflow-backend/jobs.json!");
+  console.log(" Saved to kissflow-backend/jobs.json!");
   res.status(200).json({ success: true });
 });
 
