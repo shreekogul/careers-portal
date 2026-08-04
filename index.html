@@ -300,7 +300,6 @@
             border-top-right-radius: 16px;
             position: relative;
         }
-
         .modal-close {
             position: absolute;
             top: 15px;
@@ -497,7 +496,12 @@
     // ==========================================
     // 1. FRONTEND CONFIGURATION
     // ==========================================
+    // Method 1 URL (UNTOUCHED)
     const BACKEND_API_URL = "https://kissflow-backend.onrender.com/api/jobs";
+    
+    // Method 2 URL (ADDED)
+    const METHOD_2_API_URL = "https://kissflow-method2-backend.onrender.com/api/portal-jobs";
+
     const PUBLIC_APPLY_FORM_URL = "https://development-presolutions.kissflow.com/public/Process/Pfca53fb23-bb24-4fc7-bcca-bd7b2db5ed32";
     
     let jobsData = [];
@@ -518,19 +522,41 @@
     // ==========================================
     async function fetchJobsFromKissflow() {
         try {
-            const response = await fetch(BACKEND_API_URL);
-            const result = await response.json();
+            // Fetch both Method 1 and Method 2 in parallel safely
+            const [res1, res2] = await Promise.allSettled([
+                fetch(BACKEND_API_URL).then(r => r.json()),
+                fetch(METHOD_2_API_URL).then(r => r.json())
+            ]);
 
-            console.log("Data received from backend:", result);
+            let combinedJobs = [];
 
-            if (result && result.success && result.data) {
-                jobsData = Array.isArray(result.data) ? result.data : [];
-            } else if (Array.isArray(result)) {
-                jobsData = result;
+            // Process Method 1 Response (Original Logic)
+            if (res1.status === "fulfilled") {
+                const result = res1.value;
+                console.log("Data received from Method 1 backend:", result);
+                if (result && result.success && result.data) {
+                    combinedJobs = combinedJobs.concat(Array.isArray(result.data) ? result.data : []);
+                } else if (Array.isArray(result)) {
+                    combinedJobs = combinedJobs.concat(result);
+                }
             } else {
-                console.error("Backend error or unexpected format:", result);
-                jobsData = [];
+                console.error("Method 1 fetch error:", res1.reason);
             }
+
+            // Process Method 2 Response (Added Logic)
+            if (res2.status === "fulfilled") {
+                const result = res2.value;
+                console.log("Data received from Method 2 backend:", result);
+                if (result && result.success && result.data) {
+                    combinedJobs = combinedJobs.concat(Array.isArray(result.data) ? result.data : []);
+                } else if (Array.isArray(result)) {
+                    combinedJobs = combinedJobs.concat(result);
+                }
+            } else {
+                console.error("Method 2 fetch error:", res2.reason);
+            }
+
+            jobsData = combinedJobs;
 
             // Populate Location & Department dropdowns ONLY from Kissflow data
             populateDynamicFilters(jobsData);
@@ -538,7 +564,7 @@
             // Render job cards
             renderJobs(jobsData);
         } catch (error) {
-            console.error("Could not reach backend server:", error);
+            console.error("Could not reach backend servers:", error);
             renderJobs([]);
         }
     }
@@ -592,7 +618,6 @@
             grid.innerHTML = "<p style='color:var(--text-muted); grid-column: 1/-1;'>No vacancies matching your criteria.</p>";
             return;
         }
-
         list.forEach((job, index) => {
             const card = document.createElement("div");
             card.className = "job-card";
