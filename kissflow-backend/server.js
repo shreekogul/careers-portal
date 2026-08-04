@@ -1,44 +1,49 @@
 const express = require('express');
 const cors = require('cors');
-const fs = require('fs');
-const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Path to jobs.json inside the kissflow-backend folder
-const jobsFilePath = path.join(__dirname, 'jobs.json');
+// Connect to MongoDB Atlas using the environment variable
+const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://kogulvs_db_user:g0eBX7xeHdzQlOcJ@cluster0.zjnzsrw.mongodb.net/?appName=Cluster0";
 
-// 1. Load saved jobs from 'jobs.json'
-let jobListings = fs.existsSync(jobsFilePath)
-  ? JSON.parse(fs.readFileSync(jobsFilePath, 'utf8'))
-  : [];
+mongoose.connect(MONGO_URI)
+  .then(() => console.log("Method 1 Connected to Permanent MongoDB Database!"))
+  .catch((err) => console.error("Database Connection Error:", err));
 
-// 2. Webhook Endpoint (Receives webhook data from Kissflow)
-app.post('/api/webhooks/kissflow', (req, res) => {
-  const incomingData = req.body;
+// Define the Job Schema
+const jobSchema = new mongoose.Schema({}, { strict: false, timestamps: true });
+const Job = mongoose.model('JobMethod1', jobSchema);
 
-  // Add new item to array
-  jobListings.push(incomingData);
+// Webhook or Job Creation Endpoint for Method 1
+app.post('/api/jobs', async (req, res) => {
+  try {
+    const incomingData = req.body;
+    const newJob = new Job(incomingData);
+    await newJob.save();
 
-  // Save array into kissflow-backend/jobs.json
-  fs.writeFileSync(jobsFilePath, JSON.stringify(jobListings, null, 2));
-
-  console.log(" Saved to kissflow-backend/jobs.json!");
-  res.status(200).json({ success: true });
+    console.log("Method 1 saved job permanently to MongoDB!");
+    res.status(200).json({ success: true, message: "Job saved successfully!" });
+  } catch (error) {
+    console.error("Error saving job:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-// 3. GET Endpoint for your Website (Serves jobs to frontend)
-app.get('/api/jobs', (req, res) => {
-  res.status(200).json({
-    success: true,
-    data: jobListings
-  });
+// GET Endpoint to fetch jobs for the frontend
+app.get('/api/jobs', async (req, res) => {
+  try {
+    const jobs = await Job.find().sort({ createdAt: -1 });
+    res.status(200).json({ success: true, data: jobs });
+  } catch (error) {
+    console.error("Error fetching jobs:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
 });
 
-// Start Server
-const PORT = 5000;
+const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Method 1 Server running on port ${PORT}`);
 });
