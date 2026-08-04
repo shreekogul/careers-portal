@@ -417,16 +417,10 @@
                 
                 <select id="filterDept" class="filter-select" onchange="applyFilters()">
                     <option value="All">All Departments</option>
-                    <option value="Marketing">Marketing</option>
-                    <option value="Engineering">Engineering</option>
-                    <option value="Design">Design</option>
                 </select>
 
                 <select id="filterLoc" class="filter-select" onchange="applyFilters()">
                     <option value="All">All Locations</option>
-                    <option value="New York, NY">New York, NY</option>
-                    <option value="Remote">Remote</option>
-                    <option value="Chennai, TN">Chennai, TN</option>
                 </select>
 
                 <select id="filterType" class="filter-select" onchange="applyFilters()">
@@ -497,15 +491,24 @@
     // ==========================================
     // 1. FRONTEND CONFIGURATION
     // ==========================================
-    const BACKEND_API_URL = "https://kissflow-backend.onrender.com/api/jobs";
+    // Updated Backend URL pointing directly to Method 2 Render Service
+    const BACKEND_API_URL = "https://kissflow-method2-backend.onrender.com/api/portal-jobs";
     const PUBLIC_APPLY_FORM_URL = "https://development-presolutions.kissflow.com/public/Process/Pfca53fb23-bb24-4fc7-bcca-bd7b2db5ed32";
     
     let jobsData = [];
     let savedSearches = JSON.parse(localStorage.getItem("savedSearches") || "[]");
 
-    // Helper function to extract keys dynamically (handles trailing spaces in Kissflow field names)
+    // Helper function to extract keys dynamically (handles flat and nested Kissflow 'Job Vacancy' objects)
     function getProp(obj, ...keys) {
+        if (!obj) return "";
+        
+        // Unwrap Kissflow parent wrapper if present (e.g. obj.Job_Vacancy or obj["Job Vacancy"])
+        const target = obj.Job_Vacancy || obj["Job Vacancy"] || obj.job || obj;
+
         for (let key of keys) {
+            if (target && target[key] !== undefined && target[key] !== null && target[key] !== "") {
+                return String(target[key]).trim();
+            }
             if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== "") {
                 return String(obj[key]).trim();
             }
@@ -514,19 +517,19 @@
     }
 
     // ==========================================
-    // 2. FETCH DATA FROM KISSFLOW BACKEND
+    // 2. FETCH DATA FROM KISSFLOW METHOD 2 RENDER BACKEND
     // ==========================================
     async function fetchJobsFromKissflow() {
         try {
             const response = await fetch(BACKEND_API_URL);
             const result = await response.json();
 
-            console.log("Data received from backend:", result);
+            console.log("Data received from Method 2 backend:", result);
 
-            if (result && result.success && result.data) {
-                jobsData = Array.isArray(result.data) ? result.data : [];
-            } else if (Array.isArray(result)) {
+            if (Array.isArray(result)) {
                 jobsData = result;
+            } else if (result && result.success && result.data) {
+                jobsData = Array.isArray(result.data) ? result.data : [];
             } else {
                 console.error("Backend error or unexpected format:", result);
                 jobsData = [];
@@ -538,7 +541,7 @@
             // Render job cards
             renderJobs(jobsData);
         } catch (error) {
-            console.error("Could not reach backend server:", error);
+            console.error("Could not reach Method 2 backend server:", error);
             renderJobs([]);
         }
     }
@@ -554,8 +557,8 @@
         const locations = new Set();
 
         jobs.forEach(job => {
-            const dept = getProp(job, "Department", "Department ", "dept", "department");
-            const loc = getProp(job, "Location", "Location ", "location");
+            const dept = getProp(job, "department", "Department", "Department ", "dept");
+            const loc = getProp(job, "location", "Location", "Location ");
 
             if (dept) departments.add(dept);
             if (loc) locations.add(loc);
@@ -597,21 +600,21 @@
             const card = document.createElement("div");
             card.className = "job-card";
             
-            const jobId = getProp(job, "id", "Vacancy_Slug_ID", "Vacancy Slug/ID") || index;
+            const jobId = getProp(job, "id", "vacancySlugId", "Vacancy_Slug_ID", "Vacancy Slug/ID") || index;
             card.onclick = () => openJobModal(jobId);
             
-            const jobTitle = getProp(job, "Job title", "Job title ", "title") || "Untitled Position";
-            const jobDept = getProp(job, "Department", "Department ", "dept") || "General";
-            const empType = getProp(job, "Employment Type", "Employment Type ", "type") || "Full-time";
-            const remoteStatus = getProp(job, "Remote Status", "Remote Status ", "workType", "Work Type");
+            const jobTitle = getProp(job, "jobTitle", "Job title", "Job title ", "title") || "Untitled Position";
+            const jobDept = getProp(job, "department", "Department", "Department ", "dept") || "General";
+            const empType = getProp(job, "employmentType", "Employment Type", "Employment Type ", "type") || "Full-time";
+            const remoteStatus = getProp(job, "remoteStatus", "Remote Status", "Remote Status ", "workType", "Work Type");
             
             // Badge displays "Full-time • On-site" or "Full-time • Remote" up top
             const badgeText = remoteStatus ? `${empType} • ${remoteStatus}` : empType;
 
             // Location line displays real city/state (e.g., Chennai, Tamil Nadu, India)
-            const jobLoc = getProp(job, "Location", "Location ", "location") || "Location Not Specified";
-            const jobSalary = getProp(job, "Salary Range", "Salary Range ", "salary") || "N/A";
-            const jobOpenings = getProp(job, "Openings", "Openings ", "openings") || 1;
+            const jobLoc = getProp(job, "location", "Location", "Location ") || "Location Not Specified";
+            const jobSalary = getProp(job, "salaryRange", "Salary Range", "Salary Range ", "salary") || "N/A";
+            const jobOpenings = getProp(job, "openings", "Openings", "Openings ") || 1;
 
             card.innerHTML = `
                 <div class="job-card-header">
@@ -623,7 +626,7 @@
                 <ul class="job-details-list">
                     <li><i class="fa-solid fa-location-dot"></i> ${jobLoc}</li>
                     <li><i class="fa-solid fa-sack-dollar"></i> ${jobSalary}</li>
-                    <li><i class="fa-solid fa-user"></i> ${jobOpenings}</li>
+                    <li><i class="fa-solid fa-user"></i> ${jobOpenings} Openings</li>
                 </ul>
             `;
             grid.appendChild(card);
@@ -640,10 +643,10 @@
         const type = document.getElementById("filterType")?.value || "All";
 
         const filtered = jobsData.filter(job => {
-            const title = getProp(job, "Job title", "Job title ", "title").toLowerCase();
-            const jobDept = getProp(job, "Department", "Department ", "dept");
-            const jobLoc = getProp(job, "Location", "Location ", "location");
-            const empType = getProp(job, "Employment Type", "Employment Type ", "type");
+            const title = getProp(job, "jobTitle", "Job title", "Job title ", "title").toLowerCase();
+            const jobDept = getProp(job, "department", "Department", "Department ", "dept");
+            const jobLoc = getProp(job, "location", "Location", "Location ");
+            const empType = getProp(job, "employmentType", "Employment Type", "Employment Type ", "type");
 
             const matchesSearch = title.includes(search) || jobDept.toLowerCase().includes(search);
             const matchesDept = (dept === "All") || jobDept === dept;
@@ -656,7 +659,7 @@
         renderJobs(filtered);
     }
 
-   function clearFilters() {
+    function clearFilters() {
         if (document.getElementById("searchInput")) document.getElementById("searchInput").value = "";
         if (document.getElementById("filterDept")) document.getElementById("filterDept").value = "All";
         if (document.getElementById("filterLoc")) document.getElementById("filterLoc").value = "All";
@@ -668,18 +671,18 @@
     // 5. MODAL POPUP LOGIC
     // ==========================================
     function openJobModal(jobId) {
-        const job = jobsData.find((j, idx) => (getProp(j, "id", "Vacancy_Slug_ID", "Vacancy Slug/ID") || idx) == jobId) || jobsData[0];
+        const job = jobsData.find((j, idx) => (getProp(j, "id", "vacancySlugId", "Vacancy_Slug_ID", "Vacancy Slug/ID") || idx) == jobId) || jobsData[0];
         if (!job) return;
 
-        const jobTitle = getProp(job, "Job title", "Job title ", "title") || "Untitled Position";
-        const jobDept = getProp(job, "Department", "Department ", "dept") || "General";
-        const empType = getProp(job, "Employment Type", "Employment Type ", "type") || "Full-time";
-        const remoteStatus = getProp(job, "Remote Status", "Remote Status ", "workType", "Work Type");
+        const jobTitle = getProp(job, "jobTitle", "Job title", "Job title ", "title") || "Untitled Position";
+        const jobDept = getProp(job, "department", "Department", "Department ", "dept") || "General";
+        const empType = getProp(job, "employmentType", "Employment Type", "Employment Type ", "type") || "Full-time";
+        const remoteStatus = getProp(job, "remoteStatus", "Remote Status", "Remote Status ", "workType", "Work Type");
         
-        const jobLoc = getProp(job, "Location", "Location ", "location") || "Location Not Specified";
-        const jobSalary = getProp(job, "Salary Range", "Salary Range ", "salary") || "N/A";
-        const jobOpenings = getProp(job, "Openings", "Openings ", "openings") || 1;
-        const jobAbout = getProp(job, "About the Role", "About the Role ", "about") || "No description provided.";
+        const jobLoc = getProp(job, "location", "Location", "Location ") || "Location Not Specified";
+        const jobSalary = getProp(job, "salaryRange", "Salary Range", "Salary Range ", "salary") || "N/A";
+        const jobOpenings = getProp(job, "openings", "Openings", "Openings ") || 1;
+        const jobAbout = getProp(job, "aboutTheRole", "About the Role", "About the Role ", "about") || "No description provided.";
 
         document.getElementById("modalTitle").innerText = jobTitle;
         document.getElementById("modalDept").innerText = jobDept;
@@ -696,7 +699,7 @@
         document.getElementById("modalAbout").innerText = jobAbout;
 
         const respUl = document.getElementById("modalResponsibilities");
-        const respData = getProp(job, "Responsibilities", "Responsibilities ", "responsibilities");
+        const respData = getProp(job, "responsibilities", "Responsibilities", "Responsibilities ");
         if (Array.isArray(respData)) {
             respUl.innerHTML = respData.map(r => `<li>${r}</li>`).join("");
         } else if (typeof respData === "string" && respData.trim()) {
@@ -706,7 +709,7 @@
         }
 
         const reqUl = document.getElementById("modalRequirements");
-        const reqData = getProp(job, "Requirements", "Requirements ", "requirements");
+        const reqData = getProp(job, "requirements", "Requirements", "Requirements ");
         if (Array.isArray(reqData)) {
             reqUl.innerHTML = reqData.map(r => `<li>${r}</li>`).join("");
         } else if (typeof reqData === "string" && reqData.trim()) {
