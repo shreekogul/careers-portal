@@ -1,3 +1,10 @@
+require("dotenv").config();
+
+const dns = require("dns");
+
+// Force Google DNS
+dns.setServers(["8.8.8.8", "8.8.4.4"]);
+
 const express = require('express');
 const cors = require('cors');
 const mongoose = require('mongoose');
@@ -6,8 +13,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const MONGO_URI = process.env.MONGO_URI || "mongodb+srv://kogulvs_db_user:g0eBX7xeHdzQlOcJ@cluster0.zjnzsrw.mongodb.net/?appName=Cluster0";
+const MONGO_URI = process.env.MONGO_URI;
 
+console.log("MONGO_URI:", process.env.MONGO_URI);
 mongoose.connect(MONGO_URI)
   .then(() => console.log("Method 1 Connected to Permanent MongoDB Database!"))
   .catch((err) => console.error("Database Connection Error:", err));
